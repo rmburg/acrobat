@@ -14,19 +14,45 @@
 // - support italic definitions
 //   - allow setting arbitrary styles, like a show rule?
 // - Add messages to all panic() and assert() calls
+// - rename acr -> ac?
+// - add "mark as used" function
+// - add acfi, acfip
+// - setup/config function
+//   - "show rules"
+//     - first long
+// - Content as singular + auto plural is not supported (maybe in 0.12.0?)
 
-#let normalize-definition(definition) = {
-  if type(definition) == str {
-    (singular: definition, plural: definition)
+#let normalize-definition(acronym, definition) = {
+  let make-plural(singular, plural) = {
+    if plural == auto {
+      singular + "s"
+    } else {
+      plural
+    }
+  }
+
+  if type(definition) == str or type(definition) == content {
+    (short: acronym, long: (singular: definition, plural: make-plural(definition, auto)))
   } else if type(definition) == array and definition.len() == 2 {
     let (singular, plural) = definition
-    if plural == auto {
-      (singular: singular, plural: singular + "s")
-    } else {
-      (singular: singular, plural: plural)
+    (short: acronym, long: (singular: singular, plural: make-plural(singular, plural)))
+  } else if type(definition) == dictionary {
+    let keys = definition.keys()
+
+    for key in keys {
+      assert(key in ("short", "long"))
     }
+    assert("long" in keys, message: "Dictionary-style acronym definitions must contain a `long` key")
+
+    (
+      short: definition.at("short", default: acronym),
+      long: (
+        singular: definition.at("long"),
+        plural: definition.at("plural", default: make-plural(definition.long, auto))
+      )
+    )
   } else {
-    panic("Acronym definitions must either be a string or an array with two elements")
+    panic("Acronym definitions must either be a string, a dictionary, or an array with two elements. Found " + repr(definition))
   }
 }
 
@@ -36,32 +62,32 @@
   let normalized-definitions = for (acronym, definition) in definitions {
     assert(type(acronym) == str)
 
-    ((acronym): normalize-definition(definition))
+    ((acronym): normalize-definition(acronym, definition))
   }
 
   state("acrobat-definitions").update(normalized-definitions)
 }
 
-#let format-definition-short(acronym, plural: false) = {
+#let format-definition-short(definition, plural: false) = {
   if plural {
-    acronym + "s"
+    definition.short + "s"
   } else {
-    acronym
+    definition.short
   }
 }
 
 #let format-definition-long(definition, plural: false) = {
   if plural {
-    definition.plural
+    definition.long.plural
   } else {
-    definition.singular
+    definition.long.singular
   }
 }
 
-#let format-definition-full(acronym, definition, plural: false) = {
-  format-definition-long(definition, plural: plural) + " ("
-  format-definition-short(acronym, plural: plural) + ")"
-}
+#let format-definition-full(definition, plural: false) = [
+  #format-definition-long(definition, plural: plural)
+  (#format-definition-short(definition, plural: plural))
+]
 
 #let acr(acronym, plural: false, capitalize: false, form: auto, mark-used: true) = context {
   assert(type(acronym) == str)
@@ -93,11 +119,11 @@
   }
   
   let definition-str = if form == "short" {
-    format-definition-short(acronym, plural: plural)
+    format-definition-short(definition, plural: plural)
   } else if form == "long" {
     format-definition-long(definition, plural: plural)
   } else if form == "full" {
-    format-definition-full(acronym, definition, plural: plural)
+    format-definition-full(definition, plural: plural)
   }
 
   show regex("^\w"): if capitalize { it => upper(it) } else { it => it }
