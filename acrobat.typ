@@ -5,6 +5,7 @@
 // features not in Acrostiche or Acrotastic:
 // - backlinks
 // - capitalized variants
+// - italic variants
 // - clean source code
 // - issues enabled on GitHub
 // - custom short form
@@ -13,12 +14,9 @@
 // TODO:
 // - show list of acronyms
 //   - with backlinks
-// - support italic definitions
-//   - allow setting arbitrary styles, like a show rule?
 // - Add messages to all panic() and assert() calls
 // - rename acr -> ac?
 // - add "mark as used" function
-// - add acfi, acfip
 // - setup/config function
 //   - "show rules"
 //     - first long
@@ -78,6 +76,10 @@
   state("acrobat-definitions").update(normalized-definitions)
 }
 
+#let maybe(op, enable, it) = {
+  if enable { op(it) } else { it }
+}
+
 #let format-definition-short(definition, plural: false) = {
   if plural {
     definition.short + "\u{2060}s"
@@ -86,7 +88,10 @@
   }
 }
 
-#let format-definition-long(definition, plural: false) = {
+#let format-definition-long(definition, plural: false, italic: false, capitalize: false) = {
+  show regex("^\w"): maybe.with(upper, capitalize)
+  show: maybe.with(emph, italic)
+
   if plural {
     definition.long.plural
   } else {
@@ -94,21 +99,22 @@
   }
 }
 
-#let format-definition-full(definition, plural: false) = [
-  #format-definition-long(definition, plural: plural)
+#let format-definition-full(definition, plural: false, italic: false, capitalize: false) = [
+  #format-definition-long(definition, plural: plural, italic: italic, capitalize: capitalize)
   (#format-definition-short(definition, plural: plural))
 ]
 
-#let acr(acronym, plural: false, capitalize: false, form: auto, mark-used: true) = context {
+#let acr(acronym, plural: false, capitalize: false, italic: false, form: auto, mark-used: true) = context {
   assert(type(acronym) == str)
   assert(type(plural) == bool)
   assert(type(capitalize) == bool)
+  assert(type(italic) == bool)
   assert(type(mark-used) == bool)
   assert(form == auto or form == "short" or form == "long" or form == "full")
 
   let definitions = state("acrobat-definitions").get()
   if definitions == none {
-    panic()
+    panic("Acronyms have not yet been defined. Call `init-acronyms` first")
   }
   if acronym not in definitions {
     panic("Acronym \"" + acronym + "\" has not been defined")
@@ -131,12 +137,10 @@
   let definition-str = if form == "short" {
     format-definition-short(definition, plural: plural)
   } else if form == "long" {
-    format-definition-long(definition, plural: plural)
+    format-definition-long(definition, plural: plural, italic: italic, capitalize: capitalize)
   } else if form == "full" {
-    format-definition-full(definition, plural: plural)
+    format-definition-full(definition, plural: plural, italic: italic, capitalize: capitalize)
   }
-
-  show regex("^\w"): if capitalize { it => upper(it) } else { it => it }
 
   [#definition-str #label("acrobat-backlink-target-" + acronym)]
   
@@ -147,17 +151,25 @@
 
 #let acrpl = acr.with(plural: true)
 #let acrfull = acr.with(mark-used: false, form: "full")
+#let acrfullit = acr.with(mark-used: false, form: "full", italic: true)
 #let acrfullpl = acr.with(mark-used: false, form: "full", plural: true)
+#let acrfullplit = acr.with(mark-used: false, form: "full", plural: true, italic: true)
 #let acrlong = acr.with(mark-used: false, form: "long")
+#let acrlongit = acr.with(mark-used: false, italic: true)
 #let acrlongpl = acr.with(mark-used: false, form: "long", plural: true)
+#let acrlongplit = acr.with(mark-used: false, form: "long", plural: true, italic: true)
 #let acrshort = acr.with(mark-used: false, form: "short")
 #let acrshortpl = acr.with(mark-used: false, form: "short", plural: true)
 #let Acr = acr.with(capitalize: true)
 #let Acrpl = acr.with(capitalize: true, plural: true)
 #let Acrfull = acr.with(mark-used: false, capitalize: true, form: "full")
+#let Acrfullit = acr.with(mark-used: false, capitalize: true, form: "full", italic: true)
 #let Acrfullpl = acr.with(mark-used: false, capitalize: true, form: "full", plural: true)
+#let Acrfullplit = acr.with(mark-used: false, capitalize: true, form: "full", plural: true, italic: true)
 #let Acrlong = acr.with(mark-used: false, capitalize: true, form: "long")
+#let Acrlongit = acr.with(mark-used: false, capitalize: true, form: "long", italic: true)
 #let Acrlongpl = acr.with(mark-used: false, capitalize: true, form: "long", plural: true)
+#let Acrlongplit = acr.with(mark-used: false, capitalize: true, form: "long", plural: true, italic: true)
 
 #let reset-acronym(acronym) = context {
   state("acrobat-used-" + acronym).update(false)
