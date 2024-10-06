@@ -8,7 +8,7 @@
   // Custom short form, useful for nonstandard formatting
   "GHI": (
     short: [_GHI_],
-    long: "g h i",
+    long: [_g h i_],
   ),
   // Custom short form and plural
   "JKL": (
@@ -23,7 +23,7 @@
 ))
 
 #let functions = dictionary(acrobat).pairs().filter(((name, fun)) => lower(name).starts-with("acr"))
-#let test-acronym = "GHI"
+#let test-acronym = "ABC"
 
 #table(
   columns: 3,

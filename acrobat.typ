@@ -20,12 +20,13 @@
 // - setup/config function
 //   - "show rules"
 //     - first long
-// - Content as singular + auto plural is not supported (maybe in 0.12.0?)
 
 #let normalize-definition(acronym, definition) = {
   let make-plural(singular, plural) = {
     if plural == auto {
-      singular + "s"
+      singular + "\u{200B}s"
+    } else if plural == none {
+      singular
     } else {
       plural
     }
@@ -44,15 +45,22 @@
     }
     assert("long" in keys, message: "Dictionary-style acronym definitions must contain a `long` key")
 
+    let long = definition.long
+    let (singular, plural) = if type(long) == str or type(long) == content {
+      (long, make-plural(long, auto))
+    } else if type(long) == array and long.len() == 2 {
+      let (singular, plural) = long
+      (singular, make-plural(singular, plural))
+    } else {
+      panic("Acronym definitions must either be of type str, content, or an array with two elements. Found " + repr(definition))
+    }
+
     (
       short: definition.at("short", default: acronym),
-      long: (
-        singular: definition.at("long"),
-        plural: definition.at("plural", default: make-plural(definition.long, auto))
-      )
+      long: (singular: singular, plural: plural)
     )
   } else {
-    panic("Acronym definitions must either be a string, a dictionary, or an array with two elements. Found " + repr(definition))
+    panic("Acronym definitions must either be of type str, content, dictionary, or an array with two elements. Found " + repr(definition))
   }
 }
 
@@ -70,7 +78,7 @@
 
 #let format-definition-short(definition, plural: false) = {
   if plural {
-    definition.short + "s"
+    definition.short + "\u{2060}s"
   } else {
     definition.short
   }
@@ -101,7 +109,7 @@
     panic()
   }
   if acronym not in definitions {
-    panic()
+    panic("Acronym \"" + acronym + "\" has not been defined")
   }
   let definition = definitions.at(acronym)
 
