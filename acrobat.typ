@@ -7,6 +7,8 @@
 // - capitalized variants
 // - clean source code
 // - issues enabled on GitHub
+// - custom short form
+// - content instead of str
 
 // TODO:
 // - show list of acronyms
@@ -143,19 +145,19 @@
   }
 }
 
-#let acrpl(..args) = acr(..args, plural: true)
-#let acrfull(..args) = acr(..args, mark-used: false, form: "full")
-#let acrfullpl(..args) = acr(..args, mark-used: false, form: "full", plural: true)
-#let acrlong(..args) = acr(..args, mark-used: false, form: "long")
-#let acrlongpl(..args) = acr(..args, mark-used: false, form: "long", plural: true)
-#let acrshort(..args) = acr(..args, mark-used: false, form: "short")
-#let acrshortpl(..args) = acr(..args, mark-used: false, form: "short", plural: true)
-#let Acr(..args) = acr(..args, capitalize: true)
-#let Acrpl(..args) = acr(..args, capitalize: true, plural: true)
-#let Acrfull(..args) = acr(..args, mark-used: false, capitalize: true, form: "full")
-#let Acrfullpl(..args) = acr(..args, mark-used: false, capitalize: true, form: "full", plural: true)
-#let Acrlong(..args) = acr(..args, mark-used: false, capitalize: true, form: "long")
-#let Acrlongpl(..args) = acr(..args, mark-used: false, capitalize: true, form: "long", plural: true)
+#let acrpl = acr.with(plural: true)
+#let acrfull = acr.with(mark-used: false, form: "full")
+#let acrfullpl = acr.with(mark-used: false, form: "full", plural: true)
+#let acrlong = acr.with(mark-used: false, form: "long")
+#let acrlongpl = acr.with(mark-used: false, form: "long", plural: true)
+#let acrshort = acr.with(mark-used: false, form: "short")
+#let acrshortpl = acr.with(mark-used: false, form: "short", plural: true)
+#let Acr = acr.with(capitalize: true)
+#let Acrpl = acr.with(capitalize: true, plural: true)
+#let Acrfull = acr.with(mark-used: false, capitalize: true, form: "full")
+#let Acrfullpl = acr.with(mark-used: false, capitalize: true, form: "full", plural: true)
+#let Acrlong = acr.with(mark-used: false, capitalize: true, form: "long")
+#let Acrlongpl = acr.with(mark-used: false, capitalize: true, form: "long", plural: true)
 
 #let reset-acronym(acronym) = context {
   state("acrobat-used-" + acronym).update(false)
