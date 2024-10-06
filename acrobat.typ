@@ -15,7 +15,6 @@
 // - show list of acronyms
 //   - with backlinks
 // - Add messages to all panic() and assert() calls
-// - rename acr -> ac?
 // - add "mark as used" function
 // - setup/config function
 //   - "show rules"
@@ -97,7 +96,7 @@
   (#format-definition-short(definition, plural: plural))
 ]
 
-#let acr(acronym, plural: false, capitalize: false, italic: false, form: auto, mark-used: true) = context {
+#let ac(acronym, plural: false, capitalize: false, italic: false, form: auto, mark-used: true) = context {
   assert(type(acronym) == str)
   assert(type(plural) == bool)
   assert(type(capitalize) == bool)
@@ -142,27 +141,33 @@
   }
 }
 
-#let acrpl = acr.with(plural: true)
-#let acrfull = acr.with(mark-used: false, form: "full")
-#let acrfullit = acr.with(mark-used: false, form: "full", italic: true)
-#let acrfullpl = acr.with(mark-used: false, form: "full", plural: true)
-#let acrfullplit = acr.with(mark-used: false, form: "full", plural: true, italic: true)
-#let acrlong = acr.with(mark-used: false, form: "long")
-#let acrlongit = acr.with(mark-used: false, italic: true)
-#let acrlongpl = acr.with(mark-used: false, form: "long", plural: true)
-#let acrlongplit = acr.with(mark-used: false, form: "long", plural: true, italic: true)
-#let acrshort = acr.with(mark-used: false, form: "short")
-#let acrshortpl = acr.with(mark-used: false, form: "short", plural: true)
-#let Acr = acr.with(capitalize: true)
-#let Acrpl = acr.with(capitalize: true, plural: true)
-#let Acrfull = acr.with(mark-used: false, capitalize: true, form: "full")
-#let Acrfullit = acr.with(mark-used: false, capitalize: true, form: "full", italic: true)
-#let Acrfullpl = acr.with(mark-used: false, capitalize: true, form: "full", plural: true)
-#let Acrfullplit = acr.with(mark-used: false, capitalize: true, form: "full", plural: true, italic: true)
-#let Acrlong = acr.with(mark-used: false, capitalize: true, form: "long")
-#let Acrlongit = acr.with(mark-used: false, capitalize: true, form: "long", italic: true)
-#let Acrlongpl = acr.with(mark-used: false, capitalize: true, form: "long", plural: true)
-#let Acrlongplit = acr.with(mark-used: false, capitalize: true, form: "long", plural: true, italic: true)
+#let acp = ac.with(plural: true)
+
+#let acf = ac.with(mark-used: false, form: "full")
+#let acfp = ac.with(mark-used: false, form: "full", plural: true)
+#let acfi = ac.with(mark-used: false, form: "full", italic: true)
+#let acfip = ac.with(mark-used: false, form: "full", plural: true, italic: true)
+
+#let acl = ac.with(mark-used: false, form: "long")
+#let aclp = ac.with(mark-used: false, form: "long", plural: true)
+#let acli = ac.with(mark-used: false, italic: true)
+#let aclip = ac.with(mark-used: false, form: "long", plural: true, italic: true)
+
+#let acs = ac.with(mark-used: false, form: "short")
+#let acsp = ac.with(mark-used: false, form: "short", plural: true)
+
+#let Ac = ac.with(capitalize: true)
+#let Acp = ac.with(capitalize: true, plural: true)
+
+#let Acf = ac.with(mark-used: false, capitalize: true, form: "full")
+#let Acfp = ac.with(mark-used: false, capitalize: true, form: "full", plural: true)
+#let Acfi = ac.with(mark-used: false, capitalize: true, form: "full", italic: true)
+#let Acfip = ac.with(mark-used: false, capitalize: true, form: "full", plural: true, italic: true)
+
+#let Acl = ac.with(mark-used: false, capitalize: true, form: "long")
+#let Aclp = ac.with(mark-used: false, capitalize: true, form: "long", plural: true)
+#let Acli = ac.with(mark-used: false, capitalize: true, form: "long", italic: true)
+#let Aclip = ac.with(mark-used: false, capitalize: true, form: "long", plural: true, italic: true)
 
 #let reset-acronym(acronym) = context {
   state("acrobat-used-" + acronym).update(false)

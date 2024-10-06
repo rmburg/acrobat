@@ -22,8 +22,8 @@
   "PQR": ("p q r", none),
 ))
 
-#let functions = dictionary(acrobat).pairs().filter(((name, fun)) => lower(name).starts-with("acr"))
-#let test-acronym = "ABC"
+#let functions = dictionary(acrobat).pairs().filter(((name, fun)) => lower(name).starts-with("ac"))
+#let test-acronym = "H2O"
 
 #table(
   columns: 3,
