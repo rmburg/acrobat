@@ -22,21 +22,11 @@
 //     - first long
 
 #let normalize-definition(acronym, definition) = {
-  let make-plural(singular, plural) = {
-    if plural == auto {
-      singular + "\u{200B}s"
-    } else if plural == none {
-      singular
-    } else {
-      plural
-    }
-  }
-
   if type(definition) == str or type(definition) == content {
-    (short: acronym, long: (singular: definition, plural: make-plural(definition, auto)))
+    (short: acronym, long: (singular: definition, plural: auto))
   } else if type(definition) == array and definition.len() == 2 {
     let (singular, plural) = definition
-    (short: acronym, long: (singular: singular, plural: make-plural(singular, plural)))
+    (short: acronym, long: (singular: singular, plural: plural))
   } else if type(definition) == dictionary {
     let keys = definition.keys()
 
@@ -47,10 +37,10 @@
 
     let long = definition.long
     let (singular, plural) = if type(long) == str or type(long) == content {
-      (long, make-plural(long, auto))
+      (long, auto)
     } else if type(long) == array and long.len() == 2 {
       let (singular, plural) = long
-      (singular, make-plural(singular, plural))
+      (singular, plural)
     } else {
       panic("Acronym definitions must either be of type str, content, or an array with two elements. Found " + repr(definition))
     }
@@ -80,22 +70,25 @@
   if enable { op(it) } else { it }
 }
 
+#let append-s(it) = it + "\u{2060}s"
+
 #let format-definition-short(definition, plural: false) = {
-  if plural {
-    definition.short + "\u{2060}s"
-  } else {
-    definition.short
-  }
+  show regex(".+"): maybe.with(append-s, plural)
+
+  definition.short
 }
 
 #let format-definition-long(definition, plural: false, italic: false, capitalize: false) = {
   show regex("^\w"): maybe.with(upper, capitalize)
   show: maybe.with(emph, italic)
 
-  if plural {
-    definition.long.plural
-  } else {
+  if not plural or definition.long.plural == none {
     definition.long.singular
+  } else if definition.long.plural == auto {
+    show regex(".+"): append-s
+    definition.long.singular
+  } else {
+    definition.long.plural
   }
 }
 
