@@ -139,7 +139,7 @@
       format-definition-full(definition, plural: plural, italic: italic, capitalize: capitalize)
     }
 
-    [#definition-str #label("acrobat-backlink-target-" + acronym)]
+    [#definition-str#label("acrobat-backlink-target-" + acronym)]
 
     if mark-used {
       state(used-state-key).update(true)
