@@ -46,7 +46,7 @@
 
     (
       short: definition.at("short", default: acronym),
-      long: (singular: singular, plural: plural)
+      long: (singular: singular, plural: plural),
     )
   } else {
     panic("Acronym definitions must either be of type str, content, dictionary, or an array with two elements. Found " + repr(definition))
@@ -66,7 +66,11 @@
 }
 
 #let maybe(op, enable, it) = {
-  if enable { op(it) } else { it }
+  if enable {
+    op(it)
+  } else {
+    it
+  }
 }
 
 #let append-s(it) = it + "\u{2060}s"
@@ -96,50 +100,52 @@
   (#format-definition-short(definition, plural: plural))
 ]
 
-#let ac(acronym, plural: false, capitalize: false, italic: false, form: auto, mark-used: true) = context {
-  assert(type(acronym) == str)
-  assert(type(plural) == bool)
-  assert(type(capitalize) == bool)
-  assert(type(italic) == bool)
-  assert(type(mark-used) == bool)
-  assert(form == auto or form == "short" or form == "long" or form == "full")
+#let ac(acronym, plural: false, capitalize: false, italic: false, form: auto, mark-used: true) = (
+  context {
+    assert(type(acronym) == str)
+    assert(type(plural) == bool)
+    assert(type(capitalize) == bool)
+    assert(type(italic) == bool)
+    assert(type(mark-used) == bool)
+    assert(form == auto or form == "short" or form == "long" or form == "full")
 
-  let definitions = state("acrobat-definitions").get()
-  if definitions == none {
-    panic("Acronyms have not yet been defined. Call `init-acronyms` first")
-  }
-  if acronym not in definitions {
-    panic("Acronym \"" + acronym + "\" has not been defined")
-  }
-  let definition = definitions.at(acronym)
-
-  let used-state-key = "acrobat-used-" + acronym
-  let used = state(used-state-key, false).get()
-
-  let form = if form == auto {
-    if used {
-      "short"
-    } else {
-      "full"
+    let definitions = state("acrobat-definitions").get()
+    if definitions == none {
+      panic("Acronyms have not yet been defined. Call `init-acronyms` first")
     }
-  } else {
-    form
-  }
-  
-  let definition-str = if form == "short" {
-    format-definition-short(definition, plural: plural)
-  } else if form == "long" {
-    format-definition-long(definition, plural: plural, italic: italic, capitalize: capitalize)
-  } else if form == "full" {
-    format-definition-full(definition, plural: plural, italic: italic, capitalize: capitalize)
-  }
+    if acronym not in definitions {
+      panic("Acronym \"" + acronym + "\" has not been defined")
+    }
+    let definition = definitions.at(acronym)
 
-  [#definition-str #label("acrobat-backlink-target-" + acronym)]
-  
-  if mark-used {
-    state(used-state-key).update(true)
+    let used-state-key = "acrobat-used-" + acronym
+    let used = state(used-state-key, false).get()
+
+    let form = if form == auto {
+      if used {
+        "short"
+      } else {
+        "full"
+      }
+    } else {
+      form
+    }
+
+    let definition-str = if form == "short" {
+      format-definition-short(definition, plural: plural)
+    } else if form == "long" {
+      format-definition-long(definition, plural: plural, italic: italic, capitalize: capitalize)
+    } else if form == "full" {
+      format-definition-full(definition, plural: plural, italic: italic, capitalize: capitalize)
+    }
+
+    [#definition-str #label("acrobat-backlink-target-" + acronym)]
+
+    if mark-used {
+      state(used-state-key).update(true)
+    }
   }
-}
+)
 
 #let acp = ac.with(plural: true)
 
@@ -169,14 +175,18 @@
 #let Acli = ac.with(mark-used: false, capitalize: true, form: "long", italic: true)
 #let Aclip = ac.with(mark-used: false, capitalize: true, form: "long", plural: true, italic: true)
 
-#let reset-acronym(acronym) = context {
-  state("acrobat-used-" + acronym).update(false)
-}
-
-#let reset-all-acronyms() = context {
-  let definitions = state("acrobat-definitions", (:)).get()
-
-  for key in definitions.keys() {
-    reset-acronym(key)
+#let reset-acronym(acronym) = (
+  context {
+    state("acrobat-used-" + acronym).update(false)
   }
-}
+)
+
+#let reset-all-acronyms() = (
+  context {
+    let definitions = state("acrobat-definitions", (:)).get()
+
+    for key in definitions.keys() {
+      reset-acronym(key)
+    }
+  }
+)
