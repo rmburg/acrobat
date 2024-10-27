@@ -95,10 +95,15 @@
   }
 }
 
-#let format-definition-full(definition, plural: false, italic: false, capitalize: false) = [
-  #format-definition-long(definition, plural: plural, italic: italic, capitalize: capitalize)
-  (#format-definition-short(definition, plural: plural))
-]
+#let format-definition-full(definition, plural: false, italic: false, capitalize: false) = {
+  format-definition-long(definition, plural: plural, italic: italic, capitalize: capitalize)
+
+  " ("
+
+  format-definition-short(definition, plural: plural)
+
+  ")"
+}
 
 #let ac(acronym, plural: false, capitalize: false, italic: false, form: auto, mark-used: true) = (
   context {
