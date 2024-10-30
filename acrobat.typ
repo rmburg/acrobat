@@ -75,6 +75,20 @@
 
 #let append-s(it) = it + "\u{2060}s"
 
+// https://github.com/typst/typst/issues/5273#issuecomment-2429055418
+#let capitalize-first(it) = {
+  let marker = "\u{E472}"
+  show regex(marker + "\w?"): it => {
+    let suffix = it.text.slice(marker.len())
+    if suffix.len() == 0 {
+      return
+    }
+    upper(suffix)
+  }
+  marker
+  it
+}
+
 #let format-definition-short(definition, plural: false) = {
   show regex(".+"): maybe.with(append-s, plural)
 
@@ -82,7 +96,7 @@
 }
 
 #let format-definition-long(definition, plural: false, italic: false, capitalize: false) = {
-  show regex("^\w"): maybe.with(upper, capitalize)
+  show: maybe.with(capitalize-first, capitalize)
   show: maybe.with(emph, italic)
 
   if not plural or definition.long.plural == none {
